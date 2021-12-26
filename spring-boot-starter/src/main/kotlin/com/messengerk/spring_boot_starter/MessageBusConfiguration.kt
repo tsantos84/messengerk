@@ -2,8 +2,8 @@ package com.messengerk.spring_boot_starter
 
 import com.messengerk.core.MessageBus
 import com.messengerk.core.MessageBusBuilder
+import com.messengerk.core.annotations.BusName
 import com.messengerk.core.handler.MessageHandler
-import com.messengerk.core.middleware.MessageHandlerLocator
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory
 import org.springframework.beans.factory.support.BeanDefinitionRegistry
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor
@@ -15,13 +15,13 @@ import kotlin.reflect.KClass
 @Configuration
 open class MessageBusConfiguration: BeanDefinitionRegistryPostProcessor {
 
-    private val handlerTypes: MutableMap<String, KClass<*>> = mutableMapOf()
+    private val handlerClasses: MutableMap<String, KClass<*>> = mutableMapOf()
 
     override fun postProcessBeanFactory(beanFactory: ConfigurableListableBeanFactory) {
         val handlers = beanFactory.getBeanNamesForType(MessageHandler::class.java)
         handlers.forEach {
             val def = beanFactory.getBeanDefinition(it)
-            handlerTypes[it] = Class.forName(def.beanClassName).kotlin
+            handlerClasses[it] = Class.forName(def.beanClassName).kotlin
         }
     }
 
@@ -30,13 +30,26 @@ open class MessageBusConfiguration: BeanDefinitionRegistryPostProcessor {
 
     @Bean
     open fun commandBus(context: ApplicationContext): MessageBus {
-        return MessageBusBuilder().build {
-            handlerTypes.forEach {
-                val handler = { context.getBean(it.key) as MessageHandler<Any> }
-                withHandler(it.value, handler)
+        return factory("commandBus", false, context)
+    }
+
+    @Bean
+    open fun eventBus(context: ApplicationContext): MessageBus {
+        return factory("eventBus", true, context)
+    }
+
+    private fun factory(busName: String, allowNoHandler: Boolean, context: ApplicationContext): MessageBus {
+        return MessageBusBuilder(busName).build {
+
+            handlerClasses.forEach { it ->
+                val busNameAnnotations = it.value.annotations.filterIsInstance<BusName>()
+                if (busNameAnnotations.isEmpty() || busNameAnnotations.any { it.name == busName }) {
+                    val handler = { context.getBean(it.key) as MessageHandler<Any> }
+                    withHandler(it.value, handler)
+                }
             }
 
-            allowNoHandler(false)
+            allowNoHandler(allowNoHandler)
         }
     }
 }
