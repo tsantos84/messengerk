@@ -1,4 +1,4 @@
 
 rootProject.name = "messengerk"
 
-include("core")
+include("core", "spring-boot-starter")
