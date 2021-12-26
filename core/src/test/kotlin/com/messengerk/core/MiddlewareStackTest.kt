@@ -1,4 +1,4 @@
-package com.messengerk
+package com.messengerk.core
 
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat

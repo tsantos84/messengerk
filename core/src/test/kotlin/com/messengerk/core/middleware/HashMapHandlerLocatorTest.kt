@@ -1,9 +1,9 @@
-package com.messengerk.middleware
+package com.messengerk.core.middleware
 
-import com.messengerk.Envelope
-import com.messengerk.handler.MessageHandler
-import com.messengerk.exception.MessageHandlerNotFoundException
-import com.messengerk.handler.HashMapHandlerLocator
+import com.messengerk.core.Envelope
+import com.messengerk.core.handler.MessageHandler
+import com.messengerk.core.exception.MessageHandlerNotFoundException
+import com.messengerk.core.handler.HashMapHandlerLocator
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.api.expectThrows

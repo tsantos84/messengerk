@@ -1,4 +1,4 @@
-package com.messengerk
+package com.messengerk.core
 
 import strikt.api.Assertion
 

@@ -1,7 +1,7 @@
-package com.messengerk
+package com.messengerk.core
 
-import com.messengerk.handler.MessageHandler
-import com.messengerk.stamp.HandledStamp
+import com.messengerk.core.handler.MessageHandler
+import com.messengerk.core.stamp.HandledStamp
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 
