@@ -1,15 +1,20 @@
 package com.messengerk.core
 
 import com.messengerk.core.handler.MessageHandler
+import com.messengerk.core.middleware.AddBusNameMiddleware
 import com.messengerk.core.middleware.HandleMiddleware
 import com.messengerk.core.middleware.MessageHandlerLocator
 import kotlin.reflect.KClass
 
-class MessageBusBuilder {
+class MessageBusBuilder (private val busName: String) {
 
     private val handlerMap: MutableMap<KClass<*>, MutableList<MessageHandlerLocator>> = mutableMapOf()
     private val middlewares: MutableList<Middleware> = mutableListOf()
     private var allowNoHandler = false
+
+    init {
+        withMiddleware(AddBusNameMiddleware(busName))
+    }
 
     fun withHandler(handler: MessageHandler<*>): MessageBusBuilder {
         withHandler(handler::class) { handler as MessageHandler<Any>}

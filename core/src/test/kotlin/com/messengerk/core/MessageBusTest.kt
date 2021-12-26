@@ -17,7 +17,7 @@ internal class CommandBusTest {
 
     @Test
     fun `It should handle the message`() {
-        val messageBus = MessageBusBuilder().build {
+        val messageBus = MessageBusBuilder("foo").build {
             withHandler(FooHandler())
         }
 
