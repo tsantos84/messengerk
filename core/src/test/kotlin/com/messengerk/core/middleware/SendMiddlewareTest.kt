@@ -2,12 +2,12 @@ package com.messengerk.core.middleware
 
 import com.messengerk.core.Envelope
 import com.messengerk.core.MiddlewareStack
-import com.messengerk.core.contains
 import com.messengerk.core.stamp.ReceivedStamp
 import com.messengerk.core.stamp.SentStamp
 import com.messengerk.core.transport.Routing
 import com.messengerk.core.transport.Sender
 import com.messengerk.core.transport.SenderRegistry
+import com.messengerk.core.wasSent
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
@@ -33,7 +33,7 @@ internal class SendMiddlewareTest {
             routing = Routing(mapOf(FooMessage::class to listOf("mock")))
         )
         val envelope = middleware.handle(Envelope(FooMessage()), stack)
-        expectThat(envelope).contains<SentStamp>()
+        expectThat(envelope).wasSent()
         expectThat(envelope.lastOf<SentStamp>()!!.sender).isEqualTo("mock")
         expectThat(sent).describedAs("sender sent the message").isTrue()
     }
@@ -52,7 +52,7 @@ internal class SendMiddlewareTest {
             routing = Routing(mapOf(FooMessage::class to listOf("mock")))
         )
         val envelope = middleware.handle(Envelope(FooMessage(), mutableListOf(ReceivedStamp())), stack)
-        expectThat(envelope).not().contains<SentStamp>()
+        expectThat(envelope).not().wasSent()
         expectThat(sent).describedAs("sender sent the message").isFalse()
     }
 
@@ -70,7 +70,7 @@ internal class SendMiddlewareTest {
             routing = Routing(mapOf())
         )
         val envelope = middleware.handle(Envelope(FooMessage()), stack)
-        expectThat(envelope).not().contains<SentStamp>()
+        expectThat(envelope).not().wasSent()
         expectThat(sent).describedAs("sender sent the message").isFalse()
     }
 }

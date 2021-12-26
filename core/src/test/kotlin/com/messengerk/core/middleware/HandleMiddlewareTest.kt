@@ -2,10 +2,10 @@ package com.messengerk.core.middleware
 
 import com.messengerk.core.Envelope
 import com.messengerk.core.MiddlewareStack
-import com.messengerk.core.contains
 import com.messengerk.core.exception.MessageHandlerNotFoundException
 import com.messengerk.core.handler.MessageHandler
 import com.messengerk.core.stamp.HandledStamp
+import com.messengerk.core.wasHandled
 import org.junit.jupiter.api.Test
 import strikt.api.expectCatching
 import strikt.api.expectThat
@@ -30,10 +30,10 @@ internal class HandleMiddlewareTest {
         )
 
         val envelope = middleware.handle(Envelope(FooMessage()), MiddlewareStack(listOf(middleware)))
-        expectThat(envelope).contains<HandledStamp>()
+        expectThat(envelope).wasHandled()
 
         val handledStamp = envelope.firstOf<HandledStamp>()!!
-        expectThat(handledStamp.result!! as Boolean).isTrue()
+        expectThat(handledStamp.result!! as Boolean).describedAs("handler result").isTrue()
     }
 
     @Test
