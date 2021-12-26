@@ -1,0 +1,3 @@
+package com.messengerk.exception
+
+interface MessageBusException

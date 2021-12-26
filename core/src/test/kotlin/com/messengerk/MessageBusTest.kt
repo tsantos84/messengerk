@@ -1,0 +1,27 @@
+package com.messengerk
+
+import com.messengerk.handler.MessageHandler
+import com.messengerk.stamp.HandledStamp
+import org.junit.jupiter.api.Test
+import strikt.api.expectThat
+
+internal class CommandBusTest {
+
+    class FooMessage
+
+    class FooHandler : MessageHandler<FooMessage> {
+        override fun handle(envelope: Envelope<FooMessage>): Boolean {
+            return true
+        }
+    }
+
+    @Test
+    fun `It should handle the message`() {
+        val messageBus = MessageBusBuilder().build {
+            withHandler(FooHandler())
+        }
+
+        val envelope = messageBus.dispatch(FooMessage())
+        expectThat(envelope).contains<HandledStamp>()
+    }
+}
