@@ -1,5 +1,5 @@
-package com.messengerk.stamp
+package com.messengerk.core.stamp
 
-import com.messengerk.Stamp
+import com.messengerk.core.Stamp
 
 data class HandledStamp (val handler: String, val result: Any?): Stamp

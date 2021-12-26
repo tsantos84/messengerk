@@ -1,4 +1,4 @@
-package com.messengerk
+package com.messengerk.core
 
 data class Envelope<T> (
     val message: T,

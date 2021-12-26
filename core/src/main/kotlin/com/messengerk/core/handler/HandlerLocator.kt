@@ -1,6 +1,4 @@
-package com.messengerk.handler
-
-import com.messengerk.handler.MessageHandler
+package com.messengerk.core.handler
 
 interface HandlerLocator {
     fun locate(name: String): MessageHandler<Any>

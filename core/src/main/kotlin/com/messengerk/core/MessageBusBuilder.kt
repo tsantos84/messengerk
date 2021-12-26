@@ -1,7 +1,7 @@
-package com.messengerk
+package com.messengerk.core
 
-import com.messengerk.handler.MessageHandler
-import com.messengerk.middleware.HandleMiddleware
+import com.messengerk.core.handler.MessageHandler
+import com.messengerk.core.middleware.HandleMiddleware
 import kotlin.reflect.KClass
 
 class MessageBusBuilder {

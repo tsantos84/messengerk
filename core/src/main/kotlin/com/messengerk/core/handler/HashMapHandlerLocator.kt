@@ -1,6 +1,6 @@
-package com.messengerk.handler
+package com.messengerk.core.handler
 
-import com.messengerk.exception.MessageHandlerNotFoundException
+import com.messengerk.core.exception.MessageHandlerNotFoundException
 
 class HashMapHandlerLocator(private val map: Map<String, MessageHandler<Any>> = emptyMap()) : HandlerLocator {
     override fun locate(name: String): MessageHandler<Any> {

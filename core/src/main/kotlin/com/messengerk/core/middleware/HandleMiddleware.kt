@@ -1,11 +1,11 @@
-package com.messengerk.middleware
+package com.messengerk.core.middleware
 
-import com.messengerk.Envelope
-import com.messengerk.handler.MessageHandler
-import com.messengerk.Middleware
-import com.messengerk.MiddlewareStack
-import com.messengerk.exception.MessageHandlerNotFoundException
-import com.messengerk.stamp.HandledStamp
+import com.messengerk.core.Envelope
+import com.messengerk.core.handler.MessageHandler
+import com.messengerk.core.Middleware
+import com.messengerk.core.MiddlewareStack
+import com.messengerk.core.exception.MessageHandlerNotFoundException
+import com.messengerk.core.stamp.HandledStamp
 import kotlin.reflect.KClass
 
 class HandleMiddleware(

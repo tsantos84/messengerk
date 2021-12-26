@@ -1,4 +1,4 @@
-package com.messengerk
+package com.messengerk.core
 
 class MiddlewareStack(private val middlewares: List<Middleware> = emptyList()) {
 
