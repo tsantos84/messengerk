@@ -4,7 +4,6 @@ import com.messengerk.core.Envelope
 import com.messengerk.core.MiddlewareStack
 import com.messengerk.core.contains
 import com.messengerk.core.exception.MessageHandlerNotFoundException
-import com.messengerk.core.firstOf
 import com.messengerk.core.handler.MessageHandler
 import com.messengerk.core.stamp.HandledStamp
 import org.junit.jupiter.api.Test
@@ -27,13 +26,13 @@ internal class HandleMiddlewareTest {
         }
 
         val middleware = HandleMiddleware(
-            mapOf(FooMessage::class to listOf(handler as MessageHandler<Any>))
+            mapOf(FooMessage::class to listOf { handler as MessageHandler<Any> })
         )
 
         val envelope = middleware.handle(Envelope(FooMessage()), MiddlewareStack(listOf(middleware)))
         expectThat(envelope).contains<HandledStamp>()
 
-        val handledStamp = envelope.stamps.firstOf<HandledStamp>()!!
+        val handledStamp = envelope.firstOf<HandledStamp>()!!
         expectThat(handledStamp.result!! as Boolean).isTrue()
     }
 
