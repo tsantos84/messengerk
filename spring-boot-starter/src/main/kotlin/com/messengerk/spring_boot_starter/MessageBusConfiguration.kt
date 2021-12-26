@@ -4,6 +4,7 @@ import com.messengerk.core.MessageBus
 import com.messengerk.core.MessageBusBuilder
 import com.messengerk.core.annotations.BusName
 import com.messengerk.core.handler.MessageHandler
+import com.messengerk.core.transport.Sender
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory
 import org.springframework.beans.factory.support.BeanDefinitionRegistry
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor
@@ -41,6 +42,7 @@ open class MessageBusConfiguration: BeanDefinitionRegistryPostProcessor {
     private fun factory(busName: String, allowNoHandler: Boolean, context: ApplicationContext): MessageBus {
         return MessageBusBuilder(busName).build {
 
+            // register the handlers
             handlerClasses.forEach { it ->
                 val busNameAnnotations = it.value.annotations.filterIsInstance<BusName>()
                 if (busNameAnnotations.isEmpty() || busNameAnnotations.any { it.name == busName }) {
@@ -49,6 +51,12 @@ open class MessageBusConfiguration: BeanDefinitionRegistryPostProcessor {
                 }
             }
 
+            // register the senders
+            context.getBeanNamesForType(Sender::class.java).forEach {
+                withSender(it, context.getBean(it) as Sender)
+            }
+
+            // configure handle middleware
             allowNoHandler(allowNoHandler)
         }
     }
