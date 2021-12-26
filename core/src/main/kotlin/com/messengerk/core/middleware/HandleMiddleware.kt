@@ -8,8 +8,10 @@ import com.messengerk.core.exception.MessageHandlerNotFoundException
 import com.messengerk.core.stamp.HandledStamp
 import kotlin.reflect.KClass
 
+typealias MessageHandlerLocator = () -> MessageHandler<Any>
+
 class HandleMiddleware(
-    private val handlers: Map<KClass<*>, List<MessageHandler<Any>>> = emptyMap(),
+    private val handlers: Map<KClass<*>, List<MessageHandlerLocator>> = emptyMap(),
     private val allowNoHandler: Boolean = false
 ): Middleware {
     override fun handle(envelope: Envelope<Any>, stack: MiddlewareStack): Envelope<Any> {
@@ -22,8 +24,9 @@ class HandleMiddleware(
         }
 
         this.handlers[envelope.message::class]!!.forEach {
-            val result = it.handle(envelope)
-            envelope.addStamp(HandledStamp(it::class.toString(), result))
+            val handler = it()
+            val result = handler.handle(envelope)
+            envelope.with(HandledStamp(it::class.toString(), result))
         }
 
         return stack.next().handle(envelope, stack)

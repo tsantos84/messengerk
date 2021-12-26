@@ -2,26 +2,30 @@ package com.messengerk.core
 
 import com.messengerk.core.handler.MessageHandler
 import com.messengerk.core.middleware.HandleMiddleware
+import com.messengerk.core.middleware.MessageHandlerLocator
 import kotlin.reflect.KClass
 
 class MessageBusBuilder {
 
-    private val handlerMap: MutableMap<KClass<*>, MutableList<MessageHandler<Any>>> = mutableMapOf()
+    private val handlerMap: MutableMap<KClass<*>, MutableList<MessageHandlerLocator>> = mutableMapOf()
     private val middlewares: MutableList<Middleware> = mutableListOf()
     private var allowNoHandler = false
 
     fun withHandler(handler: MessageHandler<*>): MessageBusBuilder {
+        withHandler(handler::class) { handler as MessageHandler<Any>}
+        return this
+    }
 
-        handler::class.supertypes.forEach {
+    fun withHandler(handlerClass: KClass<*>, locator: MessageHandlerLocator): MessageBusBuilder {
+        handlerClass.supertypes.forEach {
             if (it.classifier == MessageHandler::class) {
                 val message = it.arguments.first().type!!.classifier as KClass<*>
                 if (!handlerMap.containsKey(message)) {
                     handlerMap[message] = mutableListOf()
                 }
-                handlerMap[message]!!.add(handler as MessageHandler<Any>)
+                handlerMap[message]!!.add (locator)
             }
         }
-
         return this
     }
 
@@ -37,7 +41,7 @@ class MessageBusBuilder {
 
     fun build(action: MessageBusBuilder.() -> Unit): MessageBus {
         action(this)
-        middlewares.add(HandleMiddleware(handlerMap))
+        middlewares.add(HandleMiddleware(handlerMap, allowNoHandler))
         return MessageBusImpl(middlewares)
     }
 }
