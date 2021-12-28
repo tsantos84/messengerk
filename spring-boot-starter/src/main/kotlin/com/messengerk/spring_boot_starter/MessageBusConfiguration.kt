@@ -3,6 +3,7 @@ package com.messengerk.spring_boot_starter
 import com.messengerk.core.MessageBus
 import com.messengerk.core.MessageBusBuilder
 import com.messengerk.core.MessageBusRegistry
+import com.messengerk.core.RoutableMessageBus
 import com.messengerk.core.annotations.BusName
 import com.messengerk.core.config.BusConfig
 import com.messengerk.core.config.MessengerConfig
@@ -60,6 +61,10 @@ open class MessageBusConfiguration: BeanDefinitionRegistryPostProcessor {
 
         return registry
     }
+
+    @Bean
+    open fun messengerRoutableMessageBus(busRegistry: MessageBusRegistry): RoutableMessageBus =
+        RoutableMessageBus(busRegistry)
 
     override fun postProcessBeanFactory(beanFactory: ConfigurableListableBeanFactory) {
         val handlers = beanFactory.getBeanNamesForType(MessageHandler::class.java)
