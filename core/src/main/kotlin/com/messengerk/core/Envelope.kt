@@ -13,6 +13,10 @@ data class Envelope<T> (
         return allOf<T>().isNotEmpty()
     }
 
+    inline fun <reified T> notContains(): Boolean {
+        return allOf<T>().isEmpty()
+    }
+
     inline fun <reified T> allOf(): List<Stamp> {
         return this.stamps.filter { T::class == it::class }
     }

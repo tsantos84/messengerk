@@ -1,6 +1,6 @@
 package com.messengerk.core.config
 
-class TransportConfig(val name: String) {
+class TransportConfig(val name: String, val broker: String = name) {
     private val options: MutableMap<String, Any> = mutableMapOf()
 
     fun option(name: String, value: Any): TransportConfig {

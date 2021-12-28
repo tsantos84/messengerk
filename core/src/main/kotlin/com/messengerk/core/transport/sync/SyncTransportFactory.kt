@@ -7,5 +7,5 @@ import com.messengerk.core.transport.TransportFactory
 
 class SyncTransportFactory (private val messageBus: MessageBus) : TransportFactory {
     override fun create(config: TransportConfig): Transport = SyncTransport(messageBus)
-    override fun supports(config: TransportConfig): Boolean = config.name == "sync"
+    override fun supports(config: TransportConfig): Boolean = config.broker == "sync"
 }
