@@ -9,6 +9,8 @@ import com.messengerk.core.config.BusConfig
 import com.messengerk.core.config.MessengerConfig
 import com.messengerk.core.handler.MessageHandler
 import com.messengerk.core.transport.*
+import com.messengerk.core.transport.sync.SyncTransport
+import com.messengerk.core.transport.sync.SyncTransportFactory
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory
 import org.springframework.beans.factory.support.BeanDefinitionRegistry
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor
@@ -63,8 +65,10 @@ open class MessageBusConfiguration: BeanDefinitionRegistryPostProcessor {
     }
 
     @Bean
-    open fun messengerRoutableMessageBus(busRegistry: MessageBusRegistry): RoutableMessageBus =
-        RoutableMessageBus(busRegistry)
+    open fun messengerRoutableMessageBus(busRegistry: MessageBusRegistry): RoutableMessageBus = RoutableMessageBus(busRegistry)
+
+    @Bean
+    open fun messengerTransportSyncFactory(routableMessageBus: RoutableMessageBus): SyncTransportFactory = SyncTransportFactory(routableMessageBus)
 
     override fun postProcessBeanFactory(beanFactory: ConfigurableListableBeanFactory) {
         val handlers = beanFactory.getBeanNamesForType(MessageHandler::class.java)

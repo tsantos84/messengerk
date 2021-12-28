@@ -6,12 +6,14 @@ import com.messengerk.core.config.TransportConfig
 import com.messengerk.core.transport.Transport
 import com.messengerk.core.transport.TransportFactory
 import com.messengerk.core.transport.TransportRegistry
+import com.messengerk.core.transport.sync.SyncTransportFactory
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.autoconfigure.AutoConfigurations
 import org.springframework.boot.test.context.runner.ApplicationContextRunner
 import org.springframework.context.annotation.Bean
 import strikt.api.expectThat
+import strikt.assertions.isA
 import strikt.assertions.isTrue
 
 internal class TransportConfigurationTest {
@@ -30,7 +32,6 @@ internal class TransportConfigurationTest {
 
         override fun getName(): String = "mock"
     }
-
     internal class TransportConfiguration {
         @Bean
         fun messengerConfig(): MessengerConfig = MessengerConfig {
@@ -54,6 +55,16 @@ internal class TransportConfigurationTest {
                 expectThat(it).containsBean("messengerTransportRegistry")
                 val registry = it.getBean("messengerTransportRegistry") as TransportRegistry
                 expectThat(registry.has("mock")).describedAs("transport registry contains transport \"mock\"").isTrue()
+            }
+    }
+
+    @Test
+    fun `It should create register SyncTransportFactory`() {
+        contextRunner
+            .run {
+                expectThat(it).containsBean("messengerTransportSyncFactory")
+                val transport = it.getBean("messengerTransportSyncFactory") as TransportFactory
+                expectThat(transport).isA<SyncTransportFactory>()
             }
     }
 }
