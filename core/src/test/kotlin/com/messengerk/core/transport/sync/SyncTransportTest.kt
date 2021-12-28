@@ -5,7 +5,7 @@ import com.messengerk.core.handler.MessageHandler
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 
-internal class SyncSenderTest {
+internal class SyncTransportTest {
 
     internal class FooMessage
 
@@ -22,8 +22,8 @@ internal class SyncSenderTest {
             withHandler(handler)
         }
 
-        val sender = SyncSender(bus)
-        val envelope = sender.send(Envelope(FooMessage()))
+        val transport = SyncTransport(bus)
+        val envelope = transport.send(Envelope(FooMessage()))
         expectThat(envelope).wasReceived()
         expectThat(envelope).wasHandled()
     }
