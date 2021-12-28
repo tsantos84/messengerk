@@ -7,7 +7,7 @@ class MessengerConfig {
     val routing: MutableList<RoutingConfig> = mutableListOf()
     val transports: MutableList<TransportConfig> = mutableListOf()
 
-    fun build(action: MessengerConfig.() -> Unit): MessengerConfig {
+    fun configure(action: MessengerConfig.() -> Unit): MessengerConfig {
         action(this)
         return this
     }
