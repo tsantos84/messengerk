@@ -3,8 +3,10 @@ package com.messengerk.spring_boot_starter
 import com.messengerk.core.MessageBus
 import com.messengerk.core.MessageBusBuilder
 import com.messengerk.core.annotations.BusName
+import com.messengerk.core.config.BusConfig
+import com.messengerk.core.config.MessengerConfig
 import com.messengerk.core.handler.MessageHandler
-import com.messengerk.core.transport.Sender
+import com.messengerk.core.transport.*
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory
 import org.springframework.beans.factory.support.BeanDefinitionRegistry
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor
@@ -15,6 +17,17 @@ import kotlin.reflect.KClass
 
 @Configuration
 open class MessageBusConfiguration: BeanDefinitionRegistryPostProcessor {
+
+    @Bean
+    open fun messengerRouting(config: MessengerConfig): Routing {
+        val routing: MutableMap<KClass<*>, List<String>> = mutableMapOf()
+
+        config.routing.forEach {
+            routing[it.message] = it.senders
+        }
+
+        return Routing(routing)
+    }
 
     @Bean
     open fun messengerTransportRegistry(context: ApplicationContext, config: MessengerConfig): TransportRegistry {
