@@ -16,7 +16,25 @@ import kotlin.reflect.KClass
 @Configuration
 open class MessageBusConfiguration: BeanDefinitionRegistryPostProcessor {
 
-    private val handlerClasses: MutableMap<String, KClass<*>> = mutableMapOf()
+    @Bean
+    open fun messengerTransportRegistry(context: ApplicationContext, config: MessengerConfig): TransportRegistry {
+
+        val transportRegistry = TransportRegistry()
+
+        val factories = context.getBeanNamesForType(TransportFactory::class.java).map {
+            context.getBean(it) as TransportFactory
+        }
+
+        config.transports.forEach { transportConfig ->
+            factories.forEach {
+                if (it.supports(transportConfig)) {
+                    transportRegistry.register(it.create(transportConfig))
+                }
+            }
+        }
+
+        return transportRegistry
+    }
 
     override fun postProcessBeanFactory(beanFactory: ConfigurableListableBeanFactory) {
         val handlers = beanFactory.getBeanNamesForType(MessageHandler::class.java)
