@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.boot.autoconfigure.AutoConfigurations
 import org.springframework.boot.test.context.runner.ApplicationContextRunner
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Primary
 import strikt.api.expectThat
 import strikt.assertions.isTrue
 
@@ -31,9 +30,11 @@ internal class TransportConfigurationTest {
 
         override fun getName(): String = "mock"
     }
-    internal class TransportConfiguration (messengerConfig: MessengerConfig) {
-        init {
-            messengerConfig.transport("mock")
+
+    internal class TransportConfiguration {
+        @Bean
+        fun messengerConfig(): MessengerConfig = MessengerConfig {
+            transport("mock")
         }
     }
     private lateinit var contextRunner: ApplicationContextRunner

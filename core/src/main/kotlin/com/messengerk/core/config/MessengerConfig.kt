@@ -2,12 +2,18 @@ package com.messengerk.core.config
 
 import kotlin.reflect.KClass
 
-class MessengerConfig {
+class MessengerConfig (action: (MessengerConfig.() -> Unit)? = null) {
     val buses: MutableList<BusConfig> = mutableListOf()
     val routing: MutableList<RoutingConfig> = mutableListOf()
     val transports: MutableList<TransportConfig> = mutableListOf()
 
-    fun configure(action: MessengerConfig.() -> Unit): MessengerConfig {
+    init {
+        if (null != action) {
+            action(this)
+        }
+    }
+
+    operator fun invoke(action: MessengerConfig.() -> Unit): MessengerConfig {
         action(this)
         return this
     }
@@ -34,8 +40,4 @@ class MessengerConfig {
         transports.add(config)
         return this
     }
-}
-
-infix fun MessengerConfig.to(senders: List<String>): MessengerConfig {
-    return this
 }

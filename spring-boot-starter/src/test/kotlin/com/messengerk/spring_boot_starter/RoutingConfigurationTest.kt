@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.autoconfigure.AutoConfigurations
 import org.springframework.boot.test.context.runner.ApplicationContextRunner
+import org.springframework.context.annotation.Bean
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import strikt.assertions.isTrue
@@ -15,9 +16,10 @@ class RoutingConfigurationTest {
 
     internal class FooMessage
 
-    internal class RoutingConfiguration (messengerConfig: MessengerConfig) {
-        init {
-            messengerConfig.routing(FooMessage::class) {
+    internal class RoutingConfiguration {
+        @Bean
+        fun messengerConfig(): MessengerConfig = MessengerConfig {
+            routing(FooMessage::class) {
                 senders("fooSender")
             }
         }
