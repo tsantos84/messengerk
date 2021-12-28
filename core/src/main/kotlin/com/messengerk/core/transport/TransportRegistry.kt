@@ -1,6 +1,6 @@
 package com.messengerk.core.transport
 
-import com.messengerk.core.exception.SenderNotFoundException
+import com.messengerk.core.exception.TransportNotFoundException
 
 class TransportRegistry(private val transports: MutableMap<String, Transport> = mutableMapOf()) {
 
@@ -11,6 +11,6 @@ class TransportRegistry(private val transports: MutableMap<String, Transport> = 
     fun has(name: String): Boolean = transports.containsKey(name)
 
     fun get(name: String): Sender = transports.getOrElse(name) {
-        throw SenderNotFoundException(name)
+        throw TransportNotFoundException(name)
     }
 }
