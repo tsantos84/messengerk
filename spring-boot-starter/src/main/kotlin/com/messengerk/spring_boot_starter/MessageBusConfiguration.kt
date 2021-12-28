@@ -58,6 +58,10 @@ open class MessageBusConfiguration: BeanDefinitionRegistryPostProcessor {
             handlerClasses[it] = Class.forName(def.beanClassName).kotlin
         }
 
+        if (!beanFactory.containsBean("messengerConfig")) {
+            beanFactory.registerSingleton("messengerConfig", messengerConfig())
+        }
+
         val config = beanFactory.getBean("messengerConfig") as MessengerConfig
 
         config.buses.forEach {
@@ -69,8 +73,7 @@ open class MessageBusConfiguration: BeanDefinitionRegistryPostProcessor {
     override fun postProcessBeanDefinitionRegistry(registry: BeanDefinitionRegistry) {
     }
 
-    @Bean
-    open fun messengerConfig(): MessengerConfig = MessengerConfig().configure {
+    private fun messengerConfig(): MessengerConfig = MessengerConfig {
         bus("commandBus") {
             allowNoHandler = false
         }
@@ -93,10 +96,10 @@ open class MessageBusConfiguration: BeanDefinitionRegistryPostProcessor {
             }
 
             // register the transports
-            withTransportRegistry(context.getSingleton("messengerTransportRegistry") as TransportRegistry)
+            withTransportRegistry(context.getBean("messengerTransportRegistry") as TransportRegistry)
 
             // register the routing
-            withRouting(context.getSingleton("messengerRouting") as Routing)
+            withRouting(context.getBean("messengerRouting") as Routing)
 
             // configure handle middleware
             allowNoHandler(busConfig.allowNoHandler)
