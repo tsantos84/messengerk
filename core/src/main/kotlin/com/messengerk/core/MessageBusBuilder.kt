@@ -4,6 +4,9 @@ import com.messengerk.core.handler.MessageHandler
 import com.messengerk.core.middleware.AddBusNameMiddleware
 import com.messengerk.core.middleware.HandleMiddleware
 import com.messengerk.core.middleware.MessageHandlerLocator
+import com.messengerk.core.middleware.SendMiddleware
+import com.messengerk.core.transport.Routing
+import com.messengerk.core.transport.TransportRegistry
 import kotlin.reflect.KClass
 
 class MessageBusBuilder (private val busName: String) {
@@ -11,10 +14,9 @@ class MessageBusBuilder (private val busName: String) {
     private val handlerMap: MutableMap<KClass<*>, MutableList<MessageHandlerLocator>> = mutableMapOf()
     private val middlewares: MutableList<Middleware> = mutableListOf()
     private var allowNoHandler = false
-
-    init {
-        withMiddleware(AddBusNameMiddleware(busName))
-    }
+    private var transportRegistry: TransportRegistry? = null
+    private var routing: Routing? = null
+    private val routes: MutableMap<KClass<*>, MutableList<String>> = mutableMapOf()
 
     fun withHandler(handler: MessageHandler<*>): MessageBusBuilder {
         withHandler(handler::class) { handler as MessageHandler<Any>}
@@ -44,9 +46,26 @@ class MessageBusBuilder (private val busName: String) {
         return this
     }
 
+    fun withTransportRegistry(transportRegistry: TransportRegistry): MessageBusBuilder {
+        this.transportRegistry = transportRegistry
+        return this
+    }
+
+    fun withRouting(routing: Routing): MessageBusBuilder {
+        this.routing = routing
+        return this
+    }
+
     fun build(action: MessageBusBuilder.() -> Unit): MessageBus {
+        withMiddleware(AddBusNameMiddleware(busName))
         action(this)
-        middlewares.add(HandleMiddleware(handlerMap, allowNoHandler))
+        if (null != transportRegistry && null != routing) {
+            withMiddleware(SendMiddleware(
+                transportRegistry = transportRegistry!!,
+                routing = routing!!
+            ))
+        }
+        withMiddleware(HandleMiddleware(handlerMap, allowNoHandler))
         return MessageBusImpl(middlewares)
     }
 }

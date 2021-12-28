@@ -2,6 +2,8 @@ package com.messengerk.spring_boot_starter
 
 import com.messengerk.core.Envelope
 import com.messengerk.core.MessageBus
+import com.messengerk.core.MessageBusRegistry
+import com.messengerk.core.RoutableMessageBus
 import com.messengerk.core.annotations.BusName
 import com.messengerk.core.handler.MessageHandler
 import com.messengerk.core.stamp.BusNameStamp
@@ -11,7 +13,9 @@ import org.junit.jupiter.api.Test
 import org.springframework.boot.autoconfigure.AutoConfigurations
 import org.springframework.boot.test.context.runner.ApplicationContextRunner
 import strikt.api.expectThat
+import strikt.assertions.isA
 import strikt.assertions.isEqualTo
+import strikt.assertions.isTrue
 
 internal class MessageBusConfigurationTest {
 
@@ -72,6 +76,27 @@ internal class MessageBusConfigurationTest {
                 val envelope = bus.dispatch(FooMessage())
                 expectThat(envelope).contains<BusNameStamp>()
                 expectThat(envelope.firstOf<BusNameStamp>()!!.name).isEqualTo("eventBus")
+            }
+    }
+
+    @Test
+    fun `It should register the MessageBusRegistry bean`() {
+        contextRunner
+            .run {
+                expectThat(it).containsBean("messengerMessageBusRegistry")
+                val registry = it.getBean("messengerMessageBusRegistry") as MessageBusRegistry
+                expectThat(registry.containsKey("eventBus")).describedAs("registry contains the bus eventBus").isTrue()
+                expectThat(registry["eventBus"]!!.invoke()).isA<MessageBus>()
+            }
+    }
+
+    @Test
+    fun `It should register the RoutableMessageBus bean`() {
+        contextRunner
+            .run {
+                expectThat(it).containsBean("messengerRoutableMessageBus")
+                val bus = it.getBean("messengerRoutableMessageBus") as RoutableMessageBus
+                expectThat(bus).isA<MessageBus>()
             }
     }
 }
