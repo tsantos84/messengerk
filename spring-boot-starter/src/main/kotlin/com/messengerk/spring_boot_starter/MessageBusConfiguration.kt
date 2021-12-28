@@ -51,9 +51,18 @@ open class MessageBusConfiguration: BeanDefinitionRegistryPostProcessor {
 
     override fun postProcessBeanFactory(beanFactory: ConfigurableListableBeanFactory) {
         val handlers = beanFactory.getBeanNamesForType(MessageHandler::class.java)
+        val handlerClasses: MutableMap<String, KClass<*>> = mutableMapOf()
+
         handlers.forEach {
             val def = beanFactory.getBeanDefinition(it)
             handlerClasses[it] = Class.forName(def.beanClassName).kotlin
+        }
+
+        val config = beanFactory.getBean("messengerConfig") as MessengerConfig
+
+        config.buses.forEach {
+            val bus = factory(it, handlerClasses, beanFactory)
+            beanFactory.registerSingleton(it.name, bus)
         }
     }
 
@@ -61,34 +70,36 @@ open class MessageBusConfiguration: BeanDefinitionRegistryPostProcessor {
     }
 
     @Bean
-    open fun commandBus(context: ApplicationContext): MessageBus {
-        return factory("commandBus", false, context)
+    open fun messengerConfig(): MessengerConfig = MessengerConfig().configure {
+        bus("commandBus") {
+            allowNoHandler = false
+        }
+
+        bus("eventBus") {
+            allowNoHandler = true
+        }
     }
 
-    @Bean
-    open fun eventBus(context: ApplicationContext): MessageBus {
-        return factory("eventBus", true, context)
-    }
-
-    private fun factory(busName: String, allowNoHandler: Boolean, context: ApplicationContext): MessageBus {
-        return MessageBusBuilder(busName).build {
+    private fun factory(busConfig: BusConfig, handlerClasses: Map<String, KClass<*>>, context: ConfigurableListableBeanFactory): MessageBus {
+        return MessageBusBuilder(busConfig.name).build {
 
             // register the handlers
             handlerClasses.forEach { it ->
                 val busNameAnnotations = it.value.annotations.filterIsInstance<BusName>()
-                if (busNameAnnotations.isEmpty() || busNameAnnotations.any { it.name == busName }) {
+                if (busNameAnnotations.isEmpty() || busNameAnnotations.any { it.name == busConfig.name }) {
                     val handler = { context.getBean(it.key) as MessageHandler<Any> }
                     withHandler(it.value, handler)
                 }
             }
 
-            // register the senders
-            context.getBeanNamesForType(Sender::class.java).forEach {
-                withSender(it, context.getBean(it) as Sender)
-            }
+            // register the transports
+            withTransportRegistry(context.getSingleton("messengerTransportRegistry") as TransportRegistry)
+
+            // register the routing
+            withRouting(context.getSingleton("messengerRouting") as Routing)
 
             // configure handle middleware
-            allowNoHandler(allowNoHandler)
+            allowNoHandler(busConfig.allowNoHandler)
         }
     }
 }

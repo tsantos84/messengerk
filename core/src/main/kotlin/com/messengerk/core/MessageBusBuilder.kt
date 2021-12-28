@@ -6,21 +6,17 @@ import com.messengerk.core.middleware.HandleMiddleware
 import com.messengerk.core.middleware.MessageHandlerLocator
 import com.messengerk.core.middleware.SendMiddleware
 import com.messengerk.core.transport.Routing
-import com.messengerk.core.transport.Sender
-import com.messengerk.core.transport.SenderRegistry
+import com.messengerk.core.transport.TransportRegistry
 import kotlin.reflect.KClass
 
-class MessageBusBuilder (busName: String) {
+class MessageBusBuilder (private val busName: String) {
 
     private val handlerMap: MutableMap<KClass<*>, MutableList<MessageHandlerLocator>> = mutableMapOf()
     private val middlewares: MutableList<Middleware> = mutableListOf()
     private var allowNoHandler = false
-    private val senders: MutableMap<String, Sender> = mutableMapOf()
+    private var transportRegistry: TransportRegistry? = null
+    private var routing: Routing? = null
     private val routes: MutableMap<KClass<*>, MutableList<String>> = mutableMapOf()
-
-    init {
-        withMiddleware(AddBusNameMiddleware(busName))
-    }
 
     fun withHandler(handler: MessageHandler<*>): MessageBusBuilder {
         withHandler(handler::class) { handler as MessageHandler<Any>}
@@ -50,26 +46,25 @@ class MessageBusBuilder (busName: String) {
         return this
     }
 
-    fun withSender(name: String, sender: Sender): MessageBusBuilder {
-        senders[name] = sender
+    fun withTransportRegistry(transportRegistry: TransportRegistry): MessageBusBuilder {
+        this.transportRegistry = transportRegistry
         return this
     }
 
-    fun route(message: KClass<*>, senderName: String): MessageBusBuilder {
-        if (!routes.containsKey(message)) {
-            routes[message] = mutableListOf()
-        }
-
-        routes[message]!!.add(senderName)
+    fun withRouting(routing: Routing): MessageBusBuilder {
+        this.routing = routing
         return this
     }
 
     fun build(action: MessageBusBuilder.() -> Unit): MessageBus {
+        withMiddleware(AddBusNameMiddleware(busName))
         action(this)
-        withMiddleware(SendMiddleware(
-            senderRegistry = SenderRegistry(senders),
-            routing = Routing(routes)
-        ))
+        if (null != transportRegistry && null != routing) {
+            withMiddleware(SendMiddleware(
+                transportRegistry = transportRegistry!!,
+                routing = routing!!
+            ))
+        }
         withMiddleware(HandleMiddleware(handlerMap, allowNoHandler))
         return MessageBusImpl(middlewares)
     }

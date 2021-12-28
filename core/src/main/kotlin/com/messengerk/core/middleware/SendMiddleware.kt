@@ -6,10 +6,10 @@ import com.messengerk.core.MiddlewareStack
 import com.messengerk.core.stamp.ReceivedStamp
 import com.messengerk.core.stamp.SentStamp
 import com.messengerk.core.transport.Routing
-import com.messengerk.core.transport.SenderRegistry
+import com.messengerk.core.transport.TransportRegistry
 
 class SendMiddleware (
-    private val senderRegistry: SenderRegistry,
+    private val transportRegistry: TransportRegistry,
     private val routing: Routing
 ) : Middleware {
     override fun handle(envelope: Envelope<Any>, stack: MiddlewareStack): Envelope<Any> {
@@ -19,8 +19,8 @@ class SendMiddleware (
         }
 
         routing.get(envelope).forEach {
-            val sender = senderRegistry.get(it)
-            sender.send(envelope.with(SentStamp(it)))
+            val transport = transportRegistry.get(it)
+            transport.send(envelope.with(SentStamp(it)))
         }
 
         return envelope;
